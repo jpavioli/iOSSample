@@ -8,14 +8,15 @@
 
 import UIKit
 import mParticle_Apple_SDK
+import Firebase
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        FirebaseApp.configure()
         
         //initialize mParticle
         let options = MParticleOptions(key: "APPKEY",
@@ -27,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        options.identifyRequest = identityRequest
         
         //verbosity
-        //options.logLevel = MPILogLevel.verbose
+        options.logLevel = MPILogLevel.verbose
         
         //production
         //options.environment = MPEnvironment.production;

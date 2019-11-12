@@ -15,6 +15,7 @@
 		98352AA62360B4D300FE1A33 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98352AA52360B4D300FE1A33 /* Assets.xcassets */; };
 		98352AA92360B4D300FE1A33 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 98352AA72360B4D300FE1A33 /* LaunchScreen.storyboard */; };
 		98352AB12360BF5E00FE1A33 /* Main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98352AB02360BF5E00FE1A33 /* Main.swift */; };
+		98352AB32371EA2F00FE1A33 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 98352AB22371EA2F00FE1A33 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		98352AA82360B4D300FE1A33 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		98352AAA2360B4D300FE1A33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		98352AB02360BF5E00FE1A33 /* Main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Main.swift; sourceTree = "<group>"; };
+		98352AB22371EA2F00FE1A33 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
 		9AA185751C853876989799D8 /* Pods_helloWorld1.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_helloWorld1.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E871B35E7847497171D4B87A /* Pods-helloWorld1.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-helloWorld1.debug.xcconfig"; path = "Target Support Files/Pods-helloWorld1/Pods-helloWorld1.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -90,6 +92,7 @@
 				98352AA52360B4D300FE1A33 /* Assets.xcassets */,
 				98352AA72360B4D300FE1A33 /* LaunchScreen.storyboard */,
 				98352AAA2360B4D300FE1A33 /* Info.plist */,
+				98352AB22371EA2F00FE1A33 /* GoogleService-Info.plist */,
 			);
 			path = helloWorld1;
 			sourceTree = "<group>";
@@ -155,6 +158,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				98352AA92360B4D300FE1A33 /* LaunchScreen.storyboard in Resources */,
+				98352AB32371EA2F00FE1A33 /* GoogleService-Info.plist in Resources */,
 				98352AA62360B4D300FE1A33 /* Assets.xcassets in Resources */,
 				98352AA42360B4D100FE1A33 /* Main.storyboard in Resources */,
 			);

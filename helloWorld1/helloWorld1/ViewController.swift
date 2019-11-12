@@ -24,7 +24,7 @@ class ViewController: UIViewController {
         let identityCallback = {(result: MPIdentityApiResult?, error: Error?) in
             if (result?.user != nil) {
                 //IDSync request succeeded, mutate attributes or query for the MPID as needed
-                result?.user.setUserAttribute("$Gender", value: "Female")
+                result?.user.setUserAttribute("Callback", value: "Value")
             } else {
                 NSLog(error!.localizedDescription)
                 let resultCode = MPIdentityErrorResponseCode(rawValue: UInt((error! as NSError).code))
@@ -52,25 +52,15 @@ class ViewController: UIViewController {
         
         MParticle.sharedInstance().identity.login(identityRequest, completion: identityCallback)
         
-        //tracking events
-        let event = MPEvent(name: "Login Button Clicked", type: MPEventType.navigation)
-
-        event?.customAttributes = ["buttonColor": "blue"];
-
-        if (event != nil) {
-            MParticle.sharedInstance().logEvent(event!)
-        }
-        
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        
-        //emailField.text = ""
-        //usernameField.text = ""
+
     }
 
+    
 
 }
 

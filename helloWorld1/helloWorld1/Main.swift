@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import mParticle_Apple_SDK
+import WebKit
 
 class MainViewController: UIViewController {
     
@@ -18,7 +19,6 @@ class MainViewController: UIViewController {
         let identityCallback = {(result: MPIdentityApiResult?, error: Error?) in
             if (result?.user != nil) {
                 //IDSync request succeeded, mutate attributes or query for the MPID as needed
-                result?.user.setUserAttribute("example attribute key", value: "example attribute value")
             } else {
                 NSLog(error!.localizedDescription)
                 let resultCode = MPIdentityErrorResponseCode(rawValue: UInt((error! as NSError).code))
@@ -40,51 +40,62 @@ class MainViewController: UIViewController {
             }
         }
         MParticle.sharedInstance().identity.logout(MPIdentityApiRequest.withEmptyUser(),completion: identityCallback)
+        // Force end a session
+        //MParticle.sharedInstance().endSession()
         
     }
     
+    @IBOutlet weak var textLabel: UITextField!
+    
+    var txt = ""
+    
+    func showText(){
+        textLabel.text = txt
+    }
+    
+    
+    
     @IBAction func customEvent1(_ sender: Any) {
-        let event = MPEvent(name: "Button Clicked", type: MPEventType.navigation)
+        let event = MPEvent(name: "EventZ", type: MPEventType.navigation)
 
-        event?.customAttributes = ["buttonColor": "pink"];
+        event?.customAttributes = ["eventAttribute": "eventValue"];
 
         if (event != nil) {
             MParticle.sharedInstance().logEvent(event!)
         }
+        txt = "Event tapped"
+        showText()
     }
+    
+    
     
     let currentUser = MParticle.sharedInstance().identity.currentUser;
     
     // 1. Create the products
     let chicken = MPProduct.init(name: "chicken",
-                                 sku: "sku1234",
+                                 sku: "sku567",
                                  quantity: 1,
                                  price: 100.00)
+    
+    
+    
     
     @IBAction func addCart(_ sender: Any) {
         if let cart = currentUser?.cart {
             cart.addProduct(chicken)
         }
-        let event = MPEvent(name: "Added to Cart", type: MPEventType.navigation)
 
-         event?.customAttributes = ["buttonColor": "orange"];
-
-         if (event != nil) {
-             MParticle.sharedInstance().logEvent(event!)
-         }
+        txt = "Added to Cart"
+        showText()
     }
     
     @IBAction func removeCart(_ sender: Any) {
         if let cart = currentUser?.cart {
             cart.removeProduct(chicken)
         }
-        let event = MPEvent(name: "Removed from Cart", type: MPEventType.navigation)
 
-         event?.customAttributes = ["buttonColor": "yellow"];
-
-         if (event != nil) {
-             MParticle.sharedInstance().logEvent(event!)
-         }
+        txt = "Removed to Cart"
+        showText()
     }
     
     @IBAction func purchaseButton(_ sender: Any) {
@@ -93,29 +104,46 @@ class MainViewController: UIViewController {
         attributes.transactionId = "transaction-1234"
         attributes.revenue = 210.00
         attributes.tax = 10.00
-
-//        let action = MPCommerceEventAction.purchase;
-//        let event = MPCommerceEvent.init(action: action, product: chicken)
-//        event.transactionAttributes = attributes
-//        MParticle.sharedInstance().logEvent(event)
         
         // 3. Log a purchase with all items currently in the cart
         let commerce = MParticle.sharedInstance().commerce
         commerce.purchase(with: attributes,
-                          clearCart: true)
+                          clearCart: false)
         
+        if let cart = currentUser?.cart {
+            cart.clear()
+        }
+        
+        txt = "Purchased Cart"
+        showText()
     }
     
     @IBAction func attributeButton(_ sender: Any) {
         currentUser?.setUserAttribute("age", value: "26")
         currentUser?.setUserAttributeList("interests", values: ["music", "tennis", "animals"])
         
+        txt = "Set Attributes"
+        showText()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        showText()
     }
+    
+    // TESTING WEBVIEWS
+//    @IBOutlet weak var webView: WKWebView!
+//
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear( animated )
+//        
+//        //webView = WKWebView(frame: .zero,configuration: WKWebViewConfiguration())
+//        MParticle.sharedInstance().initializeWKWebView(webView)
+//        let url:URL = URL(string: "https://www.sueyoungchung.com")!
+//        let urlRequest:URLRequest = URLRequest(url: url)
+//        webView.load(urlRequest)
+//
+//    }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

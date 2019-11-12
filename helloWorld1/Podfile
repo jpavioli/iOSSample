@@ -8,4 +8,5 @@ target 'helloWorld1' do
   # Pods for helloWorld1
   pod 'mParticle-Apple-SDK', '~> 7.8'
   pod 'Parse'
+  pod 'Firebase/Core'
 end

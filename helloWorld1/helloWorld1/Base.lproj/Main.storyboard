@@ -149,10 +149,22 @@
                                     <action selector="purchaseButton:" destination="aVf-Y8-dDA" eventType="touchUpInside" id="osZ-NG-a40"/>
                                 </connections>
                             </button>
+                            <textField opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Event Triggered" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="AUP-OE-mXn">
+                                <rect key="frame" x="158" y="281" width="152" height="34"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="textLabel:" destination="aVf-Y8-dDA" eventType="editingDidEnd" id="7wl-r1-RIW"/>
+                                </connections>
+                            </textField>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <viewLayoutGuide key="safeArea" id="UyW-wk-H4I"/>
                     </view>
+                    <connections>
+                        <outlet property="textLabel" destination="AUP-OE-mXn" id="OKR-eM-SJk"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="8Nm-NX-7vP" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

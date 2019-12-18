@@ -11,13 +11,12 @@
 #import "MParticleWebView.h"
 
 static NSDateFormatter *RFC1123DateFormatter;
-static NSTimeInterval requestTimeout = 30.0;
-static NSString *mpUserAgent = nil;
 
 @interface MParticle ()
 
 @property (nonatomic, strong, readonly) MPStateMachine *stateMachine;
 @property (nonatomic, strong, readonly) MPKitContainer *kitContainer;
+@property (nonatomic, strong, readonly) MParticleWebView *webView;
 
 @end
     
@@ -77,12 +76,11 @@ static NSString *mpUserAgent = nil;
 }
 
 - (NSString *)userAgent {
-    NSString *defaultUserAgent = [NSString stringWithFormat:@"mParticle Apple SDK/%@", MParticle.sharedInstance.version];
-    return MParticle.sharedInstance.customUserAgent ?: defaultUserAgent;
-}
-
-- (void)setUserAgent:(NSString *)userAgent {
-    mpUserAgent = userAgent;
+    BOOL isConfig = [[_url relativePath] rangeOfString:@"/config"].location != NSNotFound;
+    if (isConfig) {
+        return MParticle.sharedInstance.webView.originalDefaultAgent;
+    }
+    return MParticle.sharedInstance.webView.userAgent;
 }
 
 #pragma mark Public class methods
@@ -109,11 +107,7 @@ static NSString *mpUserAgent = nil;
 }
 
 + (NSTimeInterval)requestTimeout {
-    return requestTimeout;
-}
-
-+ (void)tryToCaptureUserAgent {
-    [[[MPURLRequestBuilder alloc] init] userAgent];
+    return NETWORK_REQUEST_MAX_WAIT_SECONDS;
 }
 
 #pragma mark Public instance methods
@@ -142,7 +136,7 @@ static NSString *mpUserAgent = nil;
 - (NSMutableURLRequest *)build {
     NSMutableURLRequest *urlRequest = [NSMutableURLRequest requestWithURL:_url];
     [urlRequest setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
-    [urlRequest setTimeoutInterval:requestTimeout];
+    [urlRequest setTimeoutInterval:[MPURLRequestBuilder requestTimeout]];
     [urlRequest setHTTPMethod:_httpMethod];
 
     BOOL isIdentityRequest = [urlRequest.URL.host rangeOfString:@"identity"].location != NSNotFound || [urlRequest.URL.host isEqualToString:[MParticle sharedInstance].networkOptions.identityHost] || [urlRequest.URL.path rangeOfString:@"/identity/"].location != NSNotFound;

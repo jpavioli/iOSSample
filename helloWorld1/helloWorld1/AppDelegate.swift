@@ -8,7 +8,6 @@
 
 import UIKit
 import mParticle_Apple_SDK
-import Firebase
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,15 +15,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-        FirebaseApp.configure()
-        
         //initialize mParticle
         let options = MParticleOptions(key: "APPKEY",
                                              secret: "APPSECRET")
         
 //        let identityRequest = MPIdentityApiRequest.withEmptyUser()
-//        identityRequest.email = "customer3@example.com"
-//        identityRequest.customerId = "customer3"
+//        identityRequest.email = "example@example.com"
+//        identityRequest.customerId = "example"
 //        options.identifyRequest = identityRequest
         
         //verbosity

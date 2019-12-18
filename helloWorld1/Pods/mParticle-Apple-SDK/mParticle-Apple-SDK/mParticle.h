@@ -173,6 +173,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, unsafe_unretained, readwrite) BOOL collectUserAgent;
 
 /*
+ Default user agent to be sent in case collecting the browser user agent fails repeatedly, times out or the APIs are unavailable.
+ (Ignored if `customUserAgent` is set.) By default, a value of the form "mParticle Apple SDK/<SDK Version>" will be used as a fallback.
+ */
+@property (nonatomic, unsafe_unretained, readwrite) NSString *defaultAgent;
+
+/*
  Whether the SDK should attempt to collect Apple Search Ads attribution information. Defaults to YES
  */
 @property (nonatomic, unsafe_unretained, readwrite) BOOL collectSearchAdsAttribution;
@@ -531,7 +537,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Logs an event. This is one of the most fundamental methods of the SDK. You can define all the characteristics
- of an event in an instance of MPEvent (or any other subclass of MPBaseEvent) and pass that instance to this
+ of an event in an instance of MPEvent, MPCommerceEvent, or any other subclass of MPBaseEvent and pass that instance to this
  method to log its data to the mParticle SDK.
  @param event An instance of a subclass of MPBaseEvent (e.g MPEvent, MPCommerceEvent)
  @see MPEvent
@@ -636,7 +642,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param commerceEvent An instance of MPCommerceEvent
  @see MPCommerceEvent
  */
-- (void)logCommerceEvent:(MPCommerceEvent *)commerceEvent;
+- (void)logCommerceEvent:(MPCommerceEvent *)commerceEvent DEPRECATED_MSG_ATTRIBUTE("Replace calls to `logCommerceEvent:` with `logEvent:`");
 
 /**
  Increases the LTV (LifeTime Value) amount of a user.
@@ -836,7 +842,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param key The attribute key
  @param value The attribute value
  */
-- (void)setSessionAttribute:(NSString *)key value:(id)value;
+- (void)setSessionAttribute:(NSString *)key value:(nullable id)value;
 
 /**
  Manually begins a new session. Calling this method is a no-op if a session already exists.

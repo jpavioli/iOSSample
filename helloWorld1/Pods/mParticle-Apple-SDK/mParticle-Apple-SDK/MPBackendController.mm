@@ -35,6 +35,7 @@
 #import "MPURLRequestBuilder.h"
 #import "MPArchivist.h"
 #import "MPListenerController.h"
+#import "MParticleWebView.h"
 
 #if TARGET_OS_IOS == 1
 #import "MPLocationManager.h"
@@ -48,6 +49,7 @@ const NSInteger kExceededAttributeKeyMaximumLength = 105;
 const NSInteger kInvalidDataType = 106;
 const NSInteger kInvalidKey = 107;
 const NSTimeInterval kMPMaximumKitWaitTimeSeconds = 5;
+const NSTimeInterval kMPMaximumAgentWaitTimeSeconds = 5;
 
 static NSArray *execStatusDescriptions;
 static BOOL appBackgrounded = NO;
@@ -58,6 +60,7 @@ static BOOL appBackgrounded = NO;
 @property (nonatomic, strong) MPPersistenceController *persistenceController;
 @property (nonatomic, strong) MPStateMachine *stateMachine;
 @property (nonatomic, strong) MPKitContainer *kitContainer;
+@property (nonatomic, strong) MParticleWebView *webView;
 + (dispatch_queue_t)messageQueue;
 + (void)executeOnMessage:(void(^)(void))block;
 - (NSNumber *)sessionIDFromUUID:(NSString *)uuid;
@@ -797,10 +800,11 @@ static BOOL skipNextUpload = NO;
         
         MPMessageBuilder *messageBuilder = [MPMessageBuilder newBuilderWithMessageType:MPMessageTypeAppStateTransition session:self.session messageInfo:messageInfo];
 #if TARGET_OS_IOS == 1
+#ifndef MPARTICLE_LOCATION_DISABLE
         if ([MPLocationManager trackingLocation] && ![MParticle sharedInstance].stateMachine.locationManager.backgroundLocationTracking) {
             [[MParticle sharedInstance].stateMachine.locationManager.locationManager stopUpdatingLocation];
         }
-        
+#endif
         messageBuilder = [messageBuilder withLocation:[MParticle sharedInstance].stateMachine.location];
 #endif
         MPMessage *message = [messageBuilder build];
@@ -857,9 +861,11 @@ static BOOL skipNextUpload = NO;
     }
     
 #if TARGET_OS_IOS == 1
+#ifndef MPARTICLE_LOCATION_DISABLE
     if ([MPLocationManager trackingLocation] && ![MParticle sharedInstance].stateMachine.locationManager.backgroundLocationTracking) {
         [[MParticle sharedInstance].stateMachine.locationManager.locationManager startUpdatingLocation];
     }
+#endif
 #endif
     
     dispatch_async(messageQueue, ^{
@@ -1484,18 +1490,7 @@ static BOOL skipNextUpload = NO;
 - (void)logBaseEvent:(MPBaseEvent *)event completionHandler:(void (^)(MPBaseEvent *event, MPExecStatus execStatus))completionHandler {
     [MPListenerController.sharedInstance onAPICalled:_cmd parameter1:event];
     
-    // Forwarding calls to kits
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[MParticle sharedInstance].kitContainer forwardSDKCall:@selector(logBaseEvent:)
-                                                          event:event
-                                                     parameters:nil
-                                                    messageType:event.messageType
-                                                       userInfo:nil
-         ];
-    });
-    
-    
-    if (event.type != MPEventTypeMedia) {
+    if ([event isKindOfClass:[MPEvent class]] || [event isKindOfClass:[MPCommerceEvent class]]) {
         NSDictionary<NSString *, id> *messageInfo = [event dictionaryRepresentation];
             
             MPMessageBuilder *messageBuilder = [MPMessageBuilder newBuilderWithMessageType:event.messageType session:self.session messageInfo:messageInfo];
@@ -1540,6 +1535,8 @@ static BOOL skipNextUpload = NO;
     [self logBaseEvent:commerceEvent
      completionHandler:^(MPBaseEvent *baseEvent, MPExecStatus execStatus) {
          // Update cart
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
          NSArray *products = nil;
          if (((MPCommerceEvent *)baseEvent).action == MPCommerceEventActionAddToCart) {
              products = [((MPCommerceEvent *)baseEvent) addedProducts];
@@ -1560,7 +1557,8 @@ static BOOL skipNextUpload = NO;
                  MPILogWarning(@"Commerce event products were not removed from the cart.");
              }
          }  
-         
+         #pragma clang diagnostic pop
+
          completionHandler((MPCommerceEvent *)baseEvent, execStatus);
      }];
 }
@@ -1702,7 +1700,6 @@ static BOOL skipNextUpload = NO;
     
     __weak MPBackendController *weakSelf = self;
     dispatch_async(messageQueue, ^{
-        [MPURLRequestBuilder tryToCaptureUserAgent];
         [MParticle sharedInstance].persistenceController = [[MPPersistenceController alloc] init];
 
         if (!isApplicationStateBackground && MParticle.sharedInstance.automaticSessionTracking) {
@@ -1825,10 +1822,18 @@ static BOOL skipNextUpload = NO;
     __weak MPBackendController *weakSelf = self;
 
             [self requestConfig:^(BOOL uploadBatch) {
+                if (!uploadBatch) {
+                    if (completionHandler) {
+                        completionHandler(NO);
+                    }
+                    
+                    return;
+                }
                 __strong MPBackendController *strongSelf = weakSelf;
                 MPKitContainer *kitContainer = [MParticle sharedInstance].kitContainer;
-                BOOL shouldDelayUpload = kitContainer && [kitContainer shouldDelayUpload:kMPMaximumKitWaitTimeSeconds];
-                if (!uploadBatch || shouldDelayUpload) {
+                BOOL shouldDelayUploadForKits = kitContainer && [kitContainer shouldDelayUpload:kMPMaximumKitWaitTimeSeconds];
+                BOOL shouldDelayUpload = shouldDelayUploadForKits || [MParticle.sharedInstance.webView shouldDelayUpload:kMPMaximumAgentWaitTimeSeconds];
+                if (shouldDelayUpload) {
                     if (completionHandler) {
                         completionHandler(YES);
                     }

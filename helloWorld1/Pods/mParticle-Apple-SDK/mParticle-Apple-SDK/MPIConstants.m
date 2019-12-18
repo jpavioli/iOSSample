@@ -1,7 +1,7 @@
 #import "MPIConstants.h"
 
 // mParticle SDK Version
-NSString *const kMParticleSDKVersion = @"7.12.3";
+NSString *const kMParticleSDKVersion = @"7.12.7";
 
 // Message Type (dt)
 NSString *const kMPMessageTypeKey = @"dt";
@@ -308,7 +308,7 @@ NSString *const kMPEventTypeStringUserContent = @"UserContent";
 NSString *const kMPEventTypeStringUserPreference = @"UserPreference";
 NSString *const kMPEventTypeStringSocial = @"Social";
 NSString *const kMPEventTypeStringOther = @"Other";
-NSString *const kMPEventTypeStringMediaDiscontinued = @"Media(discontinued)";
+NSString *const kMPEventTypeStringMedia = @"Media";
 NSString *const kMPEventTypeStringProductAddToCart = @"ProductAddToCart";
 NSString *const kMPEventTypeStringProductRemoveFromCart = @"ProductRemoveFromCart";
 NSString *const kMPEventTypeStringProductCheckout = @"ProductCheckout";
@@ -322,7 +322,6 @@ NSString *const kMPEventTypeStringPromotionClick = @"PromotionClick";
 NSString *const kMPEventTypeStringProductAddToWishlist = @"ProductAddToWishlist";
 NSString *const kMPEventTypeStringProductRemoveFromWishlist = @"ProductRemoveFromWishlist";
 NSString *const kMPEventTypeStringProductImpression = @"ProductImpression";
-NSString *const kMPEventTypeStringMedia = @"Media";
 
 //
 // Primitive data type constants
@@ -369,6 +368,8 @@ const NSTimeInterval CONFIG_REQUESTS_MAX_EXPIRATION_AGE = 60*60*24.0;
 const NSTimeInterval SEARCH_ADS_ATTRIBUTION_GLOBAL_TIMEOUT_SECONDS = 30.0;
 const NSTimeInterval SEARCH_ADS_ATTRIBUTION_DELAY_BEFORE_RETRY = 3.0;
 const NSInteger SEARCH_ADS_ATTRIBUTION_MAX_RETRIES = 4;
+
+const NSTimeInterval NETWORK_REQUEST_MAX_WAIT_SECONDS = 10;
 
 // Attributes limits
 const NSInteger LIMIT_ATTR_COUNT = 100;

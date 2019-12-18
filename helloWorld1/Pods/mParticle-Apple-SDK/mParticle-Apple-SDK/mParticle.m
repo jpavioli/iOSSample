@@ -78,6 +78,7 @@ NSString *const kMPStateKey = @"state";
 @property (nonatomic, strong, nonnull) NSMutableArray *kitsInitializedBlocks;
 @property (nonatomic, readwrite) MPNetworkOptions *networkOptions;
 @property (nonatomic, strong, nullable) NSArray<NSDictionary *> *deferredKitConfiguration;
+@property (nonatomic, strong) MParticleWebView *webView;
 
 @end
 
@@ -273,6 +274,7 @@ NSString *const kMPStateKey = @"state";
     _automaticSessionTracking = YES;
     _appNotificationHandler = [[MPAppNotificationHandler alloc] init];
     _stateMachine = [[MPStateMachine alloc] init];
+    _webView = [[MParticleWebView alloc] init];
     
     return self;
 }
@@ -473,9 +475,9 @@ NSString *const kMPStateKey = @"state";
     }
     sdkInitialized = YES;
     
-    [MParticleWebView setCustomUserAgent:options.customUserAgent];
-    
     [MPListenerController.sharedInstance onAPICalled:_cmd parameter1:options];
+    
+    [self.webView startWithCustomUserAgent:options.customUserAgent shouldCollect:options.collectUserAgent defaultAgentOverride:options.defaultAgent];
     
     _backendController = [[MPBackendController alloc] initWithDelegate:self];
 
@@ -825,7 +827,10 @@ NSString *const kMPStateKey = @"state";
     } else if ([event isKindOfClass:[MPEvent class]]) {
         [self logCustomEvent:(MPEvent *)event];
     } else if ([event isKindOfClass:[MPCommerceEvent class]]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         [self logCommerceEvent:(MPCommerceEvent *)event];
+#pragma clang diagnostic pop
     } else {
         dispatch_async(messageQueue, ^{
             [MPListenerController.sharedInstance onAPICalled:_cmd parameter1:event];
@@ -833,6 +838,15 @@ NSString *const kMPStateKey = @"state";
             [self.backendController logBaseEvent:event
                                completionHandler:^(MPBaseEvent *event, MPExecStatus execStatus) {
                                }];
+            // Forwarding calls to kits
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[MParticle sharedInstance].kitContainer forwardSDKCall:@selector(logBaseEvent:)
+                                                                  event:event
+                                                             parameters:nil
+                                                            messageType:event.messageType
+                                                               userInfo:nil
+                 ];
+            });
         });
     }
 }
@@ -1542,8 +1556,18 @@ NSString *const kMPStateKey = @"state";
 - (void)handleWebviewCommand:(NSString *)command dictionary:(NSDictionary *)dictionary {
     [MPListenerController.sharedInstance onAPICalled:_cmd parameter1:command parameter2:dictionary];
     
+    if (!command || ![command isKindOfClass:[NSString class]] || (dictionary && ![dictionary isKindOfClass:[NSDictionary class]])) {
+        MPILogError(@"Unexpected data received from embedded webview");
+        return;
+    }
+    
     if ([command hasPrefix:kMParticleWebViewPathLogEvent]) {
-        MPJavascriptMessageType messageType = (MPJavascriptMessageType)[dictionary[@"EventDataType"] integerValue];
+        NSNumber *eventDataType = dictionary[@"EventDataType"];
+        if (eventDataType == nil || ![eventDataType isKindOfClass:[NSNumber class]]) {
+            MPILogError(@"Unexpected event data type received from embedded webview");
+            return;
+        }
+        MPJavascriptMessageType messageType = (MPJavascriptMessageType)[eventDataType integerValue];
         switch (messageType) {
             case MPJavascriptMessageTypePageEvent: {
                 MPEvent *event = [[MPEvent alloc] initWithName:dictionary[@"EventName"] type:(MPEventType)[dictionary[@"EventCategory"] integerValue]];
@@ -1561,7 +1585,7 @@ NSString *const kMPStateKey = @"state";
                 
             case MPJavascriptMessageTypeCommerce: {
                 MPCommerceEvent *event = [MPConvertJS MPCommerceEvent:dictionary];
-                [self logCommerceEvent:event];
+                [self logEvent:event];
             }
                 break;
                 
@@ -1625,10 +1649,22 @@ NSString *const kMPStateKey = @"state";
     } else if ([command hasPrefix:kMParticleWebViewPathRemoveUserTag]) {
         [self.identity.currentUser removeUserAttribute:dictionary[@"key"]];
     } else if ([command hasPrefix:kMParticleWebViewPathSetUserAttribute]) {
-        [self.identity.currentUser setUserAttribute:dictionary[@"key"] value:dictionary[@"value"]];
+        if (!dictionary[@"key"]) {
+            MPILogError(@"Unexpected user attribute data received from webview");
+            return;
+        }
+        if (!dictionary[@"value"]) {
+            [self.identity.currentUser setUserTag:dictionary[@"key"]];
+        } else {
+            [self.identity.currentUser setUserAttribute:dictionary[@"key"] value:dictionary[@"value"]];
+        }
     } else if ([command hasPrefix:kMParticleWebViewPathRemoveUserAttribute]) {
         [self.identity.currentUser removeUserAttribute:dictionary[@"key"]];
     } else if ([command hasPrefix:kMParticleWebViewPathSetSessionAttribute]) {
+        if (!dictionary[@"key"]) {
+            MPILogError(@"Unexpected session attribute data received from webview");
+            return;
+        }
         [self setSessionAttribute:dictionary[@"key"] value:dictionary[@"value"]];
     }
 }

@@ -9,117 +9,134 @@
 import Foundation
 import UIKit
 import mParticle_Apple_SDK
-import WebKit
 
 class MainViewController: UIViewController {
     
     @IBAction func logoutButton(_ sender: Any) {
         performSegue(withIdentifier: "logout", sender: self)
         
-        let identityCallback = {(result: MPIdentityApiResult?, error: Error?) in
-            if (result?.user != nil) {
-                //IDSync request succeeded, mutate attributes or query for the MPID as needed
-            } else {
-                NSLog(error!.localizedDescription)
-                let resultCode = MPIdentityErrorResponseCode(rawValue: UInt((error! as NSError).code))
-                switch (resultCode!) {
-                case .clientNoConnection,
-                     .clientSideTimeout:
-                    //retry the IDSync request
-                    break;
-                case .requestInProgress,
-                     .retry:
-                    //inspect your implementation if this occurs frequency
-                    //otherwise retry the IDSync request
-                    break;
-                default:
-                    // inspect error.localizedDescription to determine why the request failed
-                    // this typically means an implementation issue
-                    break;
-                }
-            }
-        }
-        MParticle.sharedInstance().identity.logout(MPIdentityApiRequest.withEmptyUser(),completion: identityCallback)
         // Force end a session
         //MParticle.sharedInstance().endSession()
         
     }
     
     @IBOutlet weak var textLabel: UITextField!
+    @IBOutlet weak var cartLabel: UITextField!
     
     var txt = ""
+    var cart = 0
     
     func showText(){
         textLabel.text = txt
     }
     
-    
+    func updateCart(){
+        cartLabel.text = String(cart)
+    }
     
     @IBAction func customEvent1(_ sender: Any) {
-        let event = MPEvent(name: "EventZ", type: MPEventType.navigation)
+        //Tracking events
+        let event = MPEvent(name: "eventName", type: MPEventType.navigation)
 
         event?.customAttributes = ["eventAttribute": "eventValue"];
 
         if (event != nil) {
             MParticle.sharedInstance().logEvent(event!)
         }
-        txt = "Event tapped"
+        txt = "Tracked event"
         showText()
+        
+        //Tracking screens
+        let screen = MPEvent(name: "ScreenA", type: MPEventType.navigation)
+        screen?.customAttributes = [ "screenAttribute": "screenValue"];
+        if (screen != nil) {
+            MParticle.sharedInstance().logScreenEvent(screen!)
+        }
+        
     }
     
-    
-    
     let currentUser = MParticle.sharedInstance().identity.currentUser;
+
+    let commerce = MParticle.sharedInstance().commerce
     
     // 1. Create the products
-    let chicken = MPProduct.init(name: "chicken",
-                                 sku: "sku567",
+    let product = MPProduct.init(name: "productName",
+                                 sku: "sku123",
                                  quantity: 1,
                                  price: 100.00)
     
     
-    
-    
     @IBAction func addCart(_ sender: Any) {
-        if let cart = currentUser?.cart {
-            cart.addProduct(chicken)
-        }
-
         txt = "Added to Cart"
         showText()
+    
+        
+        let action = MPCommerceEventAction.addToCart;
+        let event = MPCommerceEvent.init(action: action, product: product)
+        
+        MParticle.sharedInstance().logEvent(event)
+        
+        cart = cart + 1
+        
+        
+        updateCart()
     }
     
     @IBAction func removeCart(_ sender: Any) {
-        if let cart = currentUser?.cart {
-            cart.removeProduct(chicken)
-        }
-
         txt = "Removed to Cart"
         showText()
+        
+        cart = cart - 1
+        updateCart()
+        
+        let action = MPCommerceEventAction.removeFromCart;
+        let event = MPCommerceEvent.init(action: action, product: product)
+        
+        MParticle.sharedInstance().logEvent(event)
     }
     
     @IBAction func purchaseButton(_ sender: Any) {
         // 2. Summarize the transaction
         let attributes = MPTransactionAttributes.init()
         attributes.transactionId = "transaction-1234"
-        attributes.revenue = 210.00
-        attributes.tax = 10.00
+        attributes.revenue = Int(truncating: product.quantity) * Int(truncating: product.price!) as NSNumber
         
-        // 3. Log a purchase with all items currently in the cart
-        let commerce = MParticle.sharedInstance().commerce
-        commerce.purchase(with: attributes,
-                          clearCart: false)
+        // 3. Log the purchase event
+        let action = MPCommerceEventAction.purchase;
+        let event = MPCommerceEvent.init(action: action, product: product)
+        product.quantity = NSNumber(value: cart)
         
-        if let cart = currentUser?.cart {
-            cart.clear()
+        event.currency = "USD"
+        event.transactionAttributes = attributes
+        
+        func wasPurchased(quantity: NSNumber, completion: (_ result:Bool)->()){
+            if (quantity == 0){
+                txt = "No items in cart, no purchase"
+                showText()
+                print("Add at least 1 item to cart")
+                completion(false)
+            } else{
+                MParticle.sharedInstance().logEvent(event)
+                completion(true)
+            }
+        }
+
+        wasPurchased(quantity: product.quantity) {(_ result) -> () in
+            //Reset cart
+            if(result){
+                commerce.clearCart()
+                cart = 0
+                updateCart()
+            }
         }
         
         txt = "Purchased Cart"
         showText()
     }
     
+    
     @IBAction func attributeButton(_ sender: Any) {
-        currentUser?.setUserAttribute("age", value: "26")
+        currentUser?.setUserAttribute("$age", value: "26")
         currentUser?.setUserAttributeList("interests", values: ["music", "tennis", "animals"])
         
         txt = "Set Attributes"
@@ -129,21 +146,8 @@ class MainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         showText()
+        updateCart()
     }
-    
-    // TESTING WEBVIEWS
-//    @IBOutlet weak var webView: WKWebView!
-//
-//    override func viewDidAppear(_ animated: Bool) {
-//        super.viewDidAppear( animated )
-//        
-//        //webView = WKWebView(frame: .zero,configuration: WKWebViewConfiguration())
-//        MParticle.sharedInstance().initializeWKWebView(webView)
-//        let url:URL = URL(string: "https://www.sueyoungchung.com")!
-//        let urlRequest:URLRequest = URLRequest(url: url)
-//        webView.load(urlRequest)
-//
-//    }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

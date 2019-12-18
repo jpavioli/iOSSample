@@ -46,9 +46,13 @@ class ViewController: UIViewController {
             }
         }
         
-        identityRequest.email = String(emailField.text!)
-        identityRequest.customerId = String(usernameField.text!)
-        
+        if (email=="" || username==""){
+            identityRequest.email = "empty@example.com"
+            identityRequest.customerId = "empty"
+        } else {
+            identityRequest.email = email
+            identityRequest.customerId = username
+        }
         
         MParticle.sharedInstance().identity.login(identityRequest, completion: identityCallback)
         

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "D8782D99-231C-4E1A-9593-57540B01CBC0"
+   type = "0"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "10D74077-E653-406C-8C9C-D71588224501"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "helloWorld1/Main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "124"
+            endingLineNumber = "124"
+            landmarkName = "purchaseButton(_:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "10D74077-E653-406C-8C9C-D71588224501 - ab9b6a8baa06bff7"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "helloWorld1.MainViewController.purchaseButton(Any) -&gt; ()"
+                  moduleName = "helloWorld1"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/schung/Desktop/github/iOSSample/helloWorld1/helloWorld1/Main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "127"
+                  endingLineNumber = "127"
+                  offsetFromSymbolStart = "997">
+               </Location>
+               <Location
+                  uuid = "10D74077-E653-406C-8C9C-D71588224501 - 628fac20a7b4c4c8"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Bool) -&gt; () in helloWorld1.MainViewController.purchaseButton(Any) -&gt; ()"
+                  moduleName = "helloWorld1"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/schung/Desktop/github/iOSSample/helloWorld1/helloWorld1/Main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "129"
+                  endingLineNumber = "129"
+                  offsetFromSymbolStart = "118">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C06AAEA6-A128-45C5-A2A5-D7B1E8D8E5B8"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "helloWorld1/Main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "112"
+            endingLineNumber = "112"
+            landmarkName = "wasPurchased(quantity:completion:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
